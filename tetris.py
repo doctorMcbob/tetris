@@ -7,14 +7,16 @@ a tetris implementation using python and pygame
 
  todo list
 ===========
-[] fix rotation
-[] adjust lock in and leveling
+[x] fix rotation
+[/] adjust lock in and leveling
 [] get jiggy wit it
 """
 
 import pygame as pg
 from pygame.locals import *
 from random import choice
+
+from piecedata import pieces, offset_data
 
 pg.init()
 
@@ -40,146 +42,6 @@ LINES = 0
 TIME = 0
 NEXT_FIVE = []
 HOLD = None
-
-pieces = {
-    "I": [
-        [
-            [ 0 ,  0 ,  0 ,  0 ,],
-            ["I", "I", "I", "I",],
-            [ 0 ,  0 ,  0 ,  0 ,],
-            [ 0 ,  0 ,  0 ,  0 ,],
-        ], [
-            [ 0 ,  0 , "I",  0 ,],
-            [ 0 ,  0 , "I",  0 ,],
-            [ 0 ,  0 , "I",  0 ,],
-            [ 0 ,  0 , "I",  0 ,],
-        ], [
-            [ 0 ,  0 ,  0 ,  0 ,],
-            [ 0 ,  0 ,  0 ,  0 ,],
-            ["I", "I", "I", "I",],
-            [ 0 ,  0 ,  0 ,  0 ,],
-        ],[
-            [ 0 , "I",  0 ,  0 ,],
-            [ 0 , "I",  0 ,  0 ,],
-            [ 0 , "I",  0 ,  0 ,],
-            [ 0 , "I",  0 ,  0 ,],
-        ]
-    ],
-    "O": [
-        [
-            [ 0 , "O", "O",  0 ,],
-            [ 0 , "O", "O",  0 ,],
-            [ 0 ,  0 ,  0 ,  0 ,],
-        ], [
-            [ 0 , "O", "O",  0 ,],
-            [ 0 , "O", "O",  0 ,],
-            [ 0 ,  0 ,  0 ,  0 ,],
-        ], [
-            [ 0 , "O", "O",  0 ,],
-            [ 0 , "O", "O",  0 ,],
-            [ 0 ,  0 ,  0 ,  0 ,],
-        ], [
-            [ 0 , "O", "O",  0 ,],
-            [ 0 , "O", "O",  0 ,],
-            [ 0 ,  0 ,  0 ,  0 ,],
-        ]
-    ],
-    "T": [
-        [
-            [ 0 , "T",  0 ,],
-            ["T", "T", "T",],
-            [ 0 ,  0 ,  0 ,],
-        ],[
-            [ 0 , "T",  0 ,],
-            [ 0 , "T", "T",],
-            [ 0 , "T",  0 ,],
-        ],[
-            [ 0 ,  0 ,  0 ,],
-            ["T", "T", "T",],
-            [ 0 , "T",  0 ,],
-        ],[
-            [ 0 , "T",  0 ,],
-            ["T", "T",  0 ,],
-            [ 0 , "T",  0 ,],
-        ]
-    ],
-    "S": [
-        [
-            [ 0 , "S", "S",],
-            ["S", "S",  0 ,],
-            [ 0 ,  0 ,  0 ,],
-        ], [
-            [ 0 , "S",  0 ,],
-            [ 0 , "S", "S",],
-            [ 0 ,  0 , "S",],
-        ], [
-            [ 0 ,  0 ,  0 ,],
-            [ 0 , "S", "S",],
-            ["S", "S",  0 ,],
-        ], [
-            ["S",  0 ,  0 ,],
-            ["S", "S",  0 ,],
-            [ 0 , "S",  0 ,],
-        ]
-    ],
-    "Z": [
-        [
-            ["Z", "Z",  0 ,],
-            [ 0 , "Z", "Z",],
-            [ 0 ,  0 ,  0 ,],
-        ], [
-            [ 0 ,  0 , "Z",],
-            [ 0 , "Z", "Z",],
-            [ 0 , "Z",  0 ,],
-        ], [
-            [ 0 ,  0 ,  0 ,],
-            ["Z", "Z",  0 ,],
-            [ 0 , "Z", "Z",],
-        ], [
-            [ 0 , "Z",  0 ,],
-            ["Z", "Z",  0 ,],
-            ["Z",  0 ,  0 ,],
-        ]
-    ],
-    "J": [
-        [
-            ["J",  0 ,  0 ,],
-            ["J", "J", "J",],
-            [ 0 ,  0 ,  0 ,],
-        ], [
-            [ 0 , "J", "J",],
-            [ 0 , "J",  0 ,],
-            [ 0 , "J",  0 ,],
-        ], [
-            [ 0 ,  0 ,  0 ,],
-            ["J", "J", "J",],
-            [ 0 ,  0 , "J",],
-        ], [
-            [ 0 , "J",  0 ,],
-            [ 0 , "J",  0 ,],
-            ["J", "J",  0 ,],
-        ]
-    ],
-    "L": [
-        [
-            [ 0 ,  0 , "L",],
-            ["L", "L", "L",],
-            [ 0 ,  0 ,  0 ,],
-        ], [
-            [ 0 , "L",  0 ,],
-            [ 0 , "L",  0 ,],
-            [ 0 , "L", "L",],
-        ], [
-            [ 0 ,  0 ,  0 ,],
-            ["L", "L", "L",],
-            ["L",  0 ,  0 ,],
-        ], [
-            ["L", "L",  0 ,],
-            [ 0 , "L",  0 ,],
-            [ 0 , "L",  0 ,],
-        ]
-    ]
-}
 
 colorkey = {
     "I":(14, 176, 155),
@@ -306,15 +168,26 @@ def move_piece(x, y):
 
 
 def rotate_piece(cl): # 1 for clockwise, -1 for counter clockise
-    global PIECE, ROT
+    """ attempted implementation of the SRS system """
+    global PIECE, ROT, POS
     i=0
     while PIECE[i][i] == 0: i += 1
     piece = PIECE[i][i]
+    for key in offset_data:
+        if piece is "O":
+            offsets = [(0, 0)]
+        if piece in key:
+            offsets = offset_data[key][(ROT, (ROT + cl) % 4)]
+    
     remove_piece(PIECE, POS)
-    if place_piece(pieces[piece][(ROT + cl) % 4], POS):
-        ROT = (ROT + cl) % 4
-        PIECE = pieces[piece][ROT]
-
+    for offs in offsets:
+        offset = POS[0] + offs[0], POS[1] + offs[1]
+        if place_piece(pieces[piece][(ROT + cl) % 4], offset):
+            ROT = (ROT + cl) % 4
+            PIECE = pieces[piece][ROT]
+            POS = offset
+            break
+            
 def _pprint():
     print(NEXT_FIVE)
     s = "+" * 10
@@ -385,11 +258,13 @@ if __name__ == "__main__":
                     hold()
             if e.type == KEYUP:
                 if e.key == K_DOWN: down = False
-        if rotate: rotate_piece(rotate)
+        if rotate:
+            f = 0
+            rotate_piece(rotate)
         if move: move_piece(move, 0)
         if f % (30 // LVL) == 0 or down:
             if move_piece(0, 1): f = 0
-            elif min(f / (15 // LVL) > 3, 30):
+            elif min(f / (15 // LVL) > 1.5, 30):
                 check_lines()
                 swap = False
                 if not make_piece(): Quit = True
@@ -406,6 +281,9 @@ if __name__ == "__main__":
         if HOLD is not None:
             SCREEN.blit(get_piece_as_surf(HOLD), (18, 68))
         pg.display.update()
+
+    pg.display.quit()
+    pg.quit()
 
     with open('halloffame.txt', 'r') as f:
         halloffame = eval(f.read())
