@@ -14,7 +14,7 @@ a tetris implementation using python and pygame
 
 import pygame as pg
 from pygame.locals import *
-from random import choice
+from random import choice, shuffle
 
 from piecedata import pieces, offset_data
 
@@ -135,14 +135,11 @@ def remove_piece(piece, pos):
 
 
 def fill_pieces():
-    while len(NEXT_FIVE) < 5:
-        piece = choice(["I", "O", "T", "S", "Z", "J", "L"])
-        i = NEXT_FIVE.count(piece)
-        while i:
-            piece = choice(["I", "O", "T", "S", "Z", "J", "L"])
-            if piece not in NEXT_FIVE: break
-            i -= 1
-        NEXT_FIVE.append(piece)
+    global NEXT_FIVE
+    if len(NEXT_FIVE) < 5:
+        more = ["I", "O", "T", "S", "Z", "J", "L"]
+        shuffle(more)
+        NEXT_FIVE += more
 
 
 def make_piece(spawn=(4, 0)):
@@ -291,7 +288,7 @@ if __name__ == "__main__":
     i = 0
     while i < len(halloffame): 
         name, lines, time = halloffame[i]
-        if lines < LINES or (lines == LINES and time > TIME):
+        if lines < LINES or (lines == LINES and int(time) < int(TIME)):
             break
         i += 1
     halloffame.insert(i, (input("name?\n> "), LINES, str(TIME)[:-3]))
