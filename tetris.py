@@ -288,7 +288,7 @@ if __name__ == "__main__":
     i = 0
     while i < len(halloffame): 
         name, lines, time = halloffame[i]
-        if lines < LINES or (lines == LINES and int(time) < int(TIME)):
+        if lines < LINES or (lines == LINES and int(time) > int(TIME)):
             break
         i += 1
     halloffame.insert(i, (input("name?\n> "), LINES, str(TIME)[:-3]))
