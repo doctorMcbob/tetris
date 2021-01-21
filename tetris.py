@@ -15,6 +15,8 @@ a tetris implementation using python and pygame
 import pygame as pg
 from pygame.locals import *
 from random import choice, shuffle
+import os
+import sys
 
 from piecedata import pieces, offset_data
 
@@ -184,15 +186,27 @@ def rotate_piece(cl): # 1 for clockwise, -1 for counter clockise
             PIECE = pieces[piece][ROT]
             POS = offset
             break
-            
+
+terminal_colors = {
+    "S": "\033[42m",
+    "Z": "\033[41m",
+    "L": "\033[40m",
+    "J": "\033[47m",
+    "O": "\033[43m",
+    "T": "\033[45m",
+    "I": "\033[46m",
+    "blank": "\033[0m",
+}
 def _pprint():
+    os.system("clear || cls")
     print(NEXT_FIVE)
-    s = "+" * 10
+    print("+" * 10)
+    s = ""
     for line in BOARD:
         for piece in line:
-            if piece == 0: s += " "
-            else: s += piece
-        s += "\n"
+            if piece == 0: s += terminal_colors["blank"] + ". "
+            else: s += terminal_colors[piece] + "." +  piece
+        s += terminal_colors["blank"] + "\n"
     print(s)
 
 
@@ -236,6 +250,7 @@ if __name__ == "__main__":
     down = False
     swap = False
     while not Quit and LINES < 100:
+        if "-t" in sys.argv: _pprint()
         f += 1
         TIME += CLOCK.tick(30)
         if PIECE is None: make_piece()
